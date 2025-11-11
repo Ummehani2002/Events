@@ -5,9 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import uvicorn
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 import tweepy
-from serpapi import GoogleSearch
+# from serpapi import GoogleSearch  # Commented out for now
 import json
 from datetime import datetime
 
@@ -34,19 +34,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve static files from Frontend directory
-app.mount("/static", StaticFiles(directory="../Frontend"), name="static")
+# Serve static files from frontend directory (note: lowercase 'frontend')
+app.mount("/static", StaticFiles(directory="../frontend"), name="static")
 
 # Serve the main frontend page
 @app.get("/")
 async def serve_frontend():
-    return FileResponse('../Frontend/index.html')
+    return FileResponse('../frontend/index.html')
 
 # Serve other HTML pages for SPA routing
 @app.get("/{path_name:path}")
 async def serve_pages(path_name: str):
-    # Check if it's a file that exists in Frontend directory
-    frontend_path = f"../Frontend/{path_name}"
+    # Check if it's a file that exists in frontend directory
+    frontend_path = f"../frontend/{path_name}"
     
     if os.path.exists(frontend_path) and os.path.isfile(frontend_path):
         return FileResponse(frontend_path)
@@ -56,7 +56,7 @@ async def serve_pages(path_name: str):
         raise HTTPException(status_code=404, detail="API endpoint not found")
     
     # For all other routes, serve index.html for client-side routing
-    return FileResponse('../Frontend/index.html')
+    return FileResponse('../frontend/index.html')
 
 # API Routes
 @app.get("/api/health")
@@ -67,12 +67,11 @@ async def health_check():
 async def discover_events(request: EventDiscoveryRequest):
     try:
         # Your event discovery logic here
-        # This is where you'd integrate with SERP API
         print(f"Discovering events in {request.location} from {request.start_date} to {request.end_date}")
         print(f"Categories: {request.categories}")
         print(f"Max results: {request.max_results}")
         
-        # Mock data for demonstration - replace with actual SERP API calls
+        # Mock data for demonstration
         mock_events = [
             {
                 "event_name": f"Tech Conference {request.location}",
@@ -112,11 +111,10 @@ async def discover_events(request: EventDiscoveryRequest):
 async def discover_attendees(request: AttendeeDiscoveryRequest):
     try:
         # Your attendee discovery logic here
-        # This is where you'd integrate with Twitter API
         print(f"Finding attendees for: {request.event_name}")
         print(f"Max results: {request.max_results}")
         
-        # Mock data for demonstration - replace with actual Twitter API calls
+        # Mock data for demonstration
         mock_attendees = [
             {
                 "username": "@techlover123",
@@ -154,7 +152,7 @@ async def discover_attendees(request: AttendeeDiscoveryRequest):
             "api_calls_used": 0
         }
 
-# Initialize APIs (replace with your actual API keys from environment variables)
+# Initialize APIs
 def initialize_apis():
     try:
         # Get API keys from environment variables
@@ -164,9 +162,16 @@ def initialize_apis():
         twitter_access_token = os.environ.get('TWITTER_ACCESS_TOKEN')
         twitter_access_secret = os.environ.get('TWITTER_ACCESS_SECRET')
         
-        print("✅ Twitter API client initialized")
-        print("✅ SERP API client initialized")
+        if twitter_api_key:
+            print("✅ Twitter API client initialized")
+        else:
+            print("⚠️ Twitter API keys not found")
         
+        # if serp_api_key:
+        #     print("✅ SERP API client initialized")
+        # else:
+        #     print("⚠️ SERP API key not found")
+            
     except Exception as e:
         print(f"❌ API initialization error: {e}")
 
