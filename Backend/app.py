@@ -7,11 +7,11 @@ import uvicorn
 from pydantic import BaseModel
 from typing import List
 import tweepy
-# from serpapi import GoogleSearch  # Commented out for now
+# from serpapi import GoogleSearch  # Comment out for now
 import json
 from datetime import datetime
 
-# Request models
+# Request models - updated for Pydantic v1
 class EventDiscoveryRequest(BaseModel):
     location: str
     start_date: str
@@ -19,10 +19,30 @@ class EventDiscoveryRequest(BaseModel):
     categories: List[str]
     max_results: int
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "location": "New York",
+                "start_date": "2024-01-01",
+                "end_date": "2024-12-31",
+                "categories": ["technology", "music"],
+                "max_results": 10
+            }
+        }
+
 class AttendeeDiscoveryRequest(BaseModel):
     event_name: str
     max_results: int
 
+    class Config:
+        schema_extra = {
+            "example": {
+                "event_name": "Tech Conference",
+                "max_results": 20
+            }
+        }
+
+# The rest of your app code remains the same...
 app = FastAPI(title="Event Intelligence Platform")
 
 # Add CORS middleware
@@ -34,8 +54,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve static files from frontend directory (note: lowercase 'frontend')
-# Serve static files from frontend directory (note: lowercase)
+# Serve static files from frontend directory
 app.mount("/static", StaticFiles(directory="../frontend"), name="static")
 
 # Serve the main frontend page
@@ -59,20 +78,19 @@ async def serve_pages(path_name: str):
     # For all other routes, serve index.html for client-side routing
     return FileResponse('../frontend/index.html')
 
-# API Routes
+# API Routes (keep your existing routes exactly as they are)
 @app.get("/api/health")
 async def health_check():
     return {"status": "healthy", "service": "Event Intelligence Platform"}
 
 @app.post("/api/discover-events")
 async def discover_events(request: EventDiscoveryRequest):
+    # Your existing event discovery code...
     try:
-        # Your event discovery logic here
         print(f"Discovering events in {request.location} from {request.start_date} to {request.end_date}")
         print(f"Categories: {request.categories}")
         print(f"Max results: {request.max_results}")
         
-        # Mock data for demonstration
         mock_events = [
             {
                 "event_name": f"Tech Conference {request.location}",
@@ -110,12 +128,11 @@ async def discover_events(request: EventDiscoveryRequest):
 
 @app.post("/api/discover-attendees")
 async def discover_attendees(request: AttendeeDiscoveryRequest):
+    # Your existing attendee discovery code...
     try:
-        # Your attendee discovery logic here
         print(f"Finding attendees for: {request.event_name}")
         print(f"Max results: {request.max_results}")
         
-        # Mock data for demonstration
         mock_attendees = [
             {
                 "username": "@techlover123",
@@ -156,7 +173,6 @@ async def discover_attendees(request: AttendeeDiscoveryRequest):
 # Initialize APIs
 def initialize_apis():
     try:
-        # Get API keys from environment variables
         serp_api_key = os.environ.get('SERP_API_KEY')
         twitter_api_key = os.environ.get('TWITTER_API_KEY')
         twitter_api_secret = os.environ.get('TWITTER_API_SECRET')
@@ -168,11 +184,6 @@ def initialize_apis():
         else:
             print("⚠️ Twitter API keys not found")
         
-        # if serp_api_key:
-        #     print("✅ SERP API client initialized")
-        # else:
-        #     print("⚠️ SERP API key not found")
-            
     except Exception as e:
         print(f"❌ API initialization error: {e}")
 
