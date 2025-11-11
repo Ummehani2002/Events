@@ -11,7 +11,7 @@ import tweepy
 import json
 from datetime import datetime
 
-# Request models - updated for Pydantic v1
+# Request models
 class EventDiscoveryRequest(BaseModel):
     location: str
     start_date: str
@@ -42,7 +42,6 @@ class AttendeeDiscoveryRequest(BaseModel):
             }
         }
 
-# The rest of your app code remains the same...
 app = FastAPI(title="Event Intelligence Platform")
 
 # Add CORS middleware
@@ -78,14 +77,13 @@ async def serve_pages(path_name: str):
     # For all other routes, serve index.html for client-side routing
     return FileResponse('../frontend/index.html')
 
-# API Routes (keep your existing routes exactly as they are)
+# API Routes
 @app.get("/api/health")
 async def health_check():
     return {"status": "healthy", "service": "Event Intelligence Platform"}
 
 @app.post("/api/discover-events")
 async def discover_events(request: EventDiscoveryRequest):
-    # Your existing event discovery code...
     try:
         print(f"Discovering events in {request.location} from {request.start_date} to {request.end_date}")
         print(f"Categories: {request.categories}")
@@ -128,7 +126,6 @@ async def discover_events(request: EventDiscoveryRequest):
 
 @app.post("/api/discover-attendees")
 async def discover_attendees(request: AttendeeDiscoveryRequest):
-    # Your existing attendee discovery code...
     try:
         print(f"Finding attendees for: {request.event_name}")
         print(f"Max results: {request.max_results}")
