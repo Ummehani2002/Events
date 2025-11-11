@@ -35,6 +35,7 @@ app.add_middleware(
 )
 
 # Serve static files from frontend directory (note: lowercase 'frontend')
+# Serve static files from frontend directory (note: lowercase)
 app.mount("/static", StaticFiles(directory="../frontend"), name="static")
 
 # Serve the main frontend page
